@@ -131,9 +131,11 @@ def defragment2(fid: IO[str]) -> int:
 
     # go from the highest ID to the smallest and attempt to move down
     segment_ids = [s for s in segments[::-1] if s.id >= 0]
-    for seg_to_move in segment_ids:
-        s: DiskSegment = copy(seg_to_move)
-        move_seg(segments, s)
+    with tqdm.tqdm(total=len(segment_ids)) as pbar:
+        for seg_to_move in segment_ids:
+            s: DiskSegment = copy(seg_to_move)
+            move_seg(segments, s)
+            pbar.update()
 
     # expand the segments back to the map
     map = []
