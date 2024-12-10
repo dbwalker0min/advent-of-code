@@ -6,7 +6,7 @@ head out to take a look.
 
 The shopkeeper turns to you. "Any chance you can see why our computers are having issues again?"
 
-The computer appears to be trying to run a program, but its memory (your puzzle input) is corrupted. All of the
+The computer appears to be trying to run a program, but its memory (your puzzle input) is corrupted. All the
 instructions have been jumbled up!
 
 It seems like the goal of the program is just to multiply some numbers. It does that with instructions like mul(X,Y),
@@ -23,7 +23,9 @@ xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))
 Only the four highlighted sections are real mul instructions. Adding up the result of each instruction produces 161
 (2*4 + 5*5 + 11*8 + 8*5).
 
-Scan the corrupted memory for uncorrupted mul instructions. What do you get if you add up all of the results of the
+Scan the corrupted memory for uncorrupted mul instructions. What do you get if you add up all the results of the
 multiplications?
 
 """
+
+from .recover_good_multiplies import sum_multiplies
