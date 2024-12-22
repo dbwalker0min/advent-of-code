@@ -101,6 +101,11 @@ class TestDay10:
         assert obj.get_score() == 2
 
     def test_case4(self):
+        obj = TopoMap(StringIO(simple_testcase))
+
+        assert obj.get_score() == 2
+
+    def test_case5(self):
         obj = TopoMap(StringIO(example_string))
 
         assert obj.get_score() == 36

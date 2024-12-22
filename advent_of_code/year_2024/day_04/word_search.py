@@ -20,7 +20,6 @@ class Point:
 
 class WordSearch:
     def __init__(self, file: IO[str]) -> None:
-        # TODO: I could use an array for this, but I'd have to do the 2D myself
         self.grid: list[list[str]] = []
         self.columns: int
         self.read_grid(file)

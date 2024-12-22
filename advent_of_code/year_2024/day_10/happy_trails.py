@@ -29,12 +29,7 @@ class TopoMap:
         if r < 0 or r >= self.nrows or c < 0 or c >= self.ncols:
             return 0
 
-        nesw = [self.data(r-1, c), self.data(r, c+1), self.data(r+1, c), self.data(r, c-1)]
-        cell_value = self.data(r, c)
-        ic(r, c, target, cell_value, nesw)
-
         if target == 10 and self.data(r, c) == 9:
-            ic(f'Path found to ({r}, {c})')
             self.path_ends |= {(r, c)}
         else:
             for dr, dc in [(1, 0), (0, 1), (-1, 0), (0, -1)]:
