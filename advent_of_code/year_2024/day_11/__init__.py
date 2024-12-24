@@ -71,4 +71,4 @@ How many stones would you have after blinking a total of 75 times?
 
 """
 
-from .pluto_stones import blink, blink2_n
+from .pluto_stones import blink, blink_init, Stones
