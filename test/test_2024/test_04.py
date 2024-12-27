@@ -1,5 +1,7 @@
 from io import StringIO
 from advent_of_code.year_2024.day_04 import WordSearch, Point
+from pprint import pprint
+
 
 test1: str = '''
     ..X...
@@ -22,6 +24,18 @@ test2: str = '''
     MXMXAXMASX
 '''
 
+xmas_test = '''
+.M.S......
+..A..MSMS.
+.M.S.MAA..
+..A.ASMSM.
+.M.S.M....
+..........
+S.S.S.S.S.
+.A.A.A.A..
+M.M.M.M.M.
+..........'''
+
 
 class Test04:
 
@@ -40,3 +54,11 @@ class Test04:
         obj = WordSearch(StringIO(test2))
 
         assert len(obj.search_grid('XMAS')) == 18
+
+    def test_xmas(self):
+        obj = WordSearch(StringIO(xmas_test))
+        print()
+        print(obj)
+        search = obj.search_x_grid('MAS')
+        pprint(search)
+        assert len(obj.search_x_grid('MAS')) == 9

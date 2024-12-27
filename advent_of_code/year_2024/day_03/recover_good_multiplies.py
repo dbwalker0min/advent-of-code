@@ -9,24 +9,11 @@ def recover_good_multiplies(line: str) -> list[int]:
     mult: list[int] = []
     for m in re.findall(r'mul\(\d{1,3},\d{1,3}\)', line):
         match = re.fullmatch(r'mul\((\d+),(\d+)\)', m)
-        mult.append(int(match.group(1)) * int(match.group(2)))
+        mult.append(int(match.group(1))*int(match.group(2)))
     return mult
 
 
-def recover_good_multiplies2(line: str) -> list[int]:
-    mult: list[int] = []
-    emit = True
-    for m in re.findall(r'mul\(\d{1,3},\d{1,3}\)|do\(\)|don\'t\(\)', line):
-        if m == 'do()':
-            emit = True
-        elif m == 'don\'t()':
-            emit = False
-        elif emit:
-            match = re.fullmatch(r'mul\((\d+),(\d+)\)', m)
-            mult.append(int(match.group(1)) * int(match.group(2)))
 
-    print(mult)
-    return mult
 
 
 def sum_multiplies(file: IO[str]) -> int:
@@ -37,9 +24,30 @@ def sum_multiplies(file: IO[str]) -> int:
     return total
 
 
-def sum_multiplies2(file: IO[str]) -> int:
+def sum_cond_multiplies(file: IO[str]) -> int:
     total = 0
+    mul_re = re.compile(r"don't\(\)|do\(\)|mul\((\d{1,3}),(\d{1,3})\)")
+    enabled = True
     for line in file:
-        total += sum(recover_good_multiplies2(line))
+        while line:
+            while m := re.search(mul_re, line):
+                match = line[m.start():m.end()]
+                print(match)
+                if match.startswith('do('):
+                    enabled = True
+                    print('Do')
+                elif match.startswith("don't("):
+                    print('Dont')
+                    enabled = False
+                else:
+                    if enabled:
+                        a, b = [int(g) for g in m.groups()]
+                        print(a, b)
 
+                        total += a * b
+
+                line = line[m.end():]
+            break
     return total
+
+

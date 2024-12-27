@@ -25,7 +25,6 @@ class WordSearch:
         self.read_grid(file)
         self.rows = len(self.grid)
 
-
     def read_grid(self, file: IO[str]) -> None:
         """Read the grid from the file"""
         self.columns = -1
@@ -66,6 +65,26 @@ class WordSearch:
 
         return results
 
+    def search_x_at_loc(self, loc: Point, search_str: str) -> Point | None:
+        if self.element(loc) == search_str[1]:
+            possibilities = [search_str[0] + search_str[2], search_str[2] + search_str[0]]
+            w1 = self.element(loc + Point(1, 1)) + self.element(loc + Point(-1, -1))
+            w2 = self.element(loc + Point(1, -1)) + self.element(loc + Point(-1, 1))
+            if w1 in possibilities and w2 in possibilities:
+                return loc
+        return None
+
+    def search_x_grid(self, search_str: str):
+        results: list[Point] = []
+        for i in range(self.rows):
+            for j in range(self.columns):
+                p = Point(i, j)
+                valid = self.search_x_at_loc(p, search_str)
+                if valid:
+                    results.append(valid)
+
+        return results
+
     def search_grid(self, search_str: str) -> list[tuple[str, Point]]:
         results: list[tuple[str, Point]] = []
         for i in range(self.rows):
@@ -74,3 +93,7 @@ class WordSearch:
                 results.extend(self.search_at_loc(p, search_str))
 
         return results
+
+    def __repr__(self) -> str:
+        lines: list[str] = []
+        return '\n'.join([''.join(l) for l in self.grid])
