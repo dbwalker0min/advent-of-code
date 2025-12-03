@@ -1,5 +1,4 @@
 from io import TextIOBase
-from itertools import permutations
 import functools
 
 
@@ -37,13 +36,6 @@ def find_all_factors(n: int) -> list[int]:
         if n % i == 0:
             factors.append(i)
     return factors
-
-
-def product(input: list[int]) -> int:
-    prod = 1
-    for i in input:
-        prod *= i
-    return prod
 
 
 def validate_code2(code: int) -> bool:
