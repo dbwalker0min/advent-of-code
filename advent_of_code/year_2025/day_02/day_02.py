@@ -31,7 +31,7 @@ def find_all_factors(n: int) -> list[int]:
     """
     factors = []
     # Iterate from 1 up to the number itself
-    for i in range(1, n):
+    for i in range(1, (n // 2) + 1):
         # Check if 'i' divides the 'number' with no remainder
         if n % i == 0:
             factors.append(i)
