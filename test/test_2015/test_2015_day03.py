@@ -1,4 +1,3 @@
-from io import StringIO
 from advent_of_code.year_2015.day_03.day_03 import santa_moves
 
 def test_simple_moves():

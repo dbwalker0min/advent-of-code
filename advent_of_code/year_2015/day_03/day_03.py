@@ -1,26 +1,18 @@
 from enum import StrEnum
 from itertools import cycle
+from dataclasses import dataclass
 
-class Tuple2D:
-    def __init__(self, x: int, y: int):
-        self._x = x
-        self._y = y
+@dataclass(frozen=True)
+class Tuple2D():
+    x: int
+    y: int
     
     def __add__(self, b) -> 'Tuple2D':
-        return Tuple2D(self._x + b._x, self._y + b._y)
-    
-    def __eq__(self, b) -> bool:
-        return self._x == b._x and self._y == b._y
-    
-    def __hash__(self) -> int:
-        return hash((self._x, self._y))  # Value-based hash!
-
+        return Tuple2D(self.x + b.x, self.y + b.y)
+        
     def as_tuple(self) -> tuple[int, int]:
-        return self._x, self._y
-    
-    def __str__(self) -> str:
-        return f'({self._x}, {self._y})'
-    
+        return self.x, self.y
+        
 moves = {'^': Tuple2D(0, 1), 'v': Tuple2D(0, -1), '>': Tuple2D(1, 0), '<': Tuple2D(-1, 0)}    
 
 class Grid:
