@@ -1,12 +1,8 @@
-from .day_04 import solve_part1, solve_part2
-
+from advent_of_code.year_2015.day_04 import mine_coin
 
 def main():
-    with open("input.txt") as f:
-        data = f.read().strip().splitlines()
-    print("Part 1:", solve_part1(data))
-    print("Part 2:", solve_part2(data))
-
+    print(f'Coin key 5 is {mine_coin('yzbqklnj', 5)}')
+    print(f'Coin key 6 is {mine_coin('yzbqklnj', 6)}')
 
 if __name__ == "__main__":
     main()
