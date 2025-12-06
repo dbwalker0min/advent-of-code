@@ -1,7 +1,20 @@
 from io import StringIO
 
 from advent_of_code.year_2025.day_05.day_05 import nfresh_ingredients
+from advent_of_code.year_2025.day_05.range_list import RangeList
 
+def test_rangelist_1():
+    rl = RangeList()
+    rl.add((1, 5))
+    result = rl.get_range_list()
+    assert result == [(1, 5)]
+
+def test_rangelist_2():
+    rl = RangeList()
+    rl.add((1, 5))
+    rl.add((3, 7))
+    result = rl.get_range_list()
+    assert result == [(1,7)]
 
 def test_basic():
     # This is the example input
@@ -36,7 +49,7 @@ def test_overlapped_range_start():
     result = nfresh_ingredients(StringIO(input_str.strip()))
     assert result.n_valid == 0
     assert result.n_fresh == 4 + 7
-    assert result.ingredient_list == [(2, 8), (10, 13)]
+    assert result.ingredient_list == [(10, 13), (2, 8)]
 
 def test_overlapped_range_end():
     input_str = """
@@ -49,7 +62,7 @@ def test_overlapped_range_end():
     result = nfresh_ingredients(StringIO(input_str.strip()))
     assert result.n_valid == 0
     assert result.n_fresh == 9 - 4 + 1 + 13 - 10 + 1
-    assert result.ingredient_list == [(4, 9), (10, 13)]
+    assert result.ingredient_list == [(10, 13), (4, 9)]
 
 def test_overlapped_joined():
     input_str = """
@@ -75,7 +88,7 @@ def test_overlapped_containted():
     result = nfresh_ingredients(StringIO(input_str.strip()))
     assert result.n_valid == 0
     assert result.n_fresh == 9
-    assert result.ingredient_list == [(4, 8), (10, 13)]
+    assert result.ingredient_list == [(10, 13), (4, 8)]
 
 def test_overlapped_span_multiple():
     input_str = """
@@ -86,7 +99,7 @@ def test_overlapped_span_multiple():
 1
 """
     result = nfresh_ingredients(StringIO(input_str.strip()))
-    assert result.ingredient_list == [(4, 8), (10, 13)]
+    assert result.ingredient_list == [(2, 16)]
     assert result.n_valid == 0
-    assert result.n_fresh == 9
+    assert result.n_fresh == 15
 
