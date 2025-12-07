@@ -1,12 +1,18 @@
-from .day_06 import solve_part1, solve_part2
-
+from advent_of_code.year_2015.day_06 import SantaVision
+from pathlib import Path
 
 def main():
-    with open("input.txt") as f:
-        data = f.read().strip().splitlines()
-    print("Part 1:", solve_part1(data))
-    print("Part 2:", solve_part2(data))
+    inp_filename = Path(__file__).parent / 'input.txt'
+    my_grid = SantaVision()
+    with open(inp_filename) as f:
+        my_grid.run_instructions_file(f)
+        print(f'Number of pixels on: {my_grid.number_pixels_on()}')
 
+        # now repeat it for part 2
+        my_grid = SantaVision(part=2)
+        f.seek(0)
+        my_grid.run_instructions_file(f)
+        print(f'Total brightness: {my_grid.number_pixels_on()}')
 
 if __name__ == "__main__":
     main()
