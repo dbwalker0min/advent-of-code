@@ -1,8 +1,8 @@
-import pathlib
+import random
+from pprint import pprint
+from advent_of_code.year_2015.day_07 import LogicKit
 
-from advent_of_code.year_2015.day_07 import solve_part1, solve_part2
-
-# Adjust this path logic to match your test setup if needed
+# This is the test case
 input_txt = """123 -> x
 456 -> y
 x AND y -> d
@@ -14,10 +14,12 @@ NOT y -> i
 """
 
 def test_part1():
-    data = INPUT.read_text().strip().splitlines()
-    assert solve_part1(data) is not None
+    random.seed(3145897)
+    inp = input_txt.split('\n')
+    random.shuffle(inp)
 
 
-def test_part2():
-    data = INPUT.read_text().strip().splitlines()
-    assert solve_part2(data) is not None
+    pprint(inp)
+
+    assert False
+
