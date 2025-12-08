@@ -2,6 +2,8 @@ from io import TextIOBase
 from itertools import count
 
 class Manifold:
+    _translation_table = str.maketrans('^S', '.|')
+
     def __init__(self, f: TextIOBase, trace: bool = False):
         """
         Initializer for Manifold. Accepts a file object to initialize the manifold. 
@@ -23,26 +25,27 @@ class Manifold:
     def step(self, trace: bool = True) -> bool:
         """Perform a single step of the tachyon propagation. Returns true when finished"""
         # Propagate the tachyon into the next row
-        cur_row = list(self._manifold[self._step])
+        cur_row: list[str] = list(self._manifold[self._step])
         next_row = list(self._manifold[self._step + 1])
-        for col, cr, nr in zip(count(0), cur_row, next_row):
-            if cr in '|S':
-                # Tachyon found. Propagate it.
-                if nr == '^':
-                    self._nsplit += 1
-                    # Splitter found. Place tachyons on either side of the splitter
-                    # This is for the left tachyon. It must fit in the range.
-                    # This could fail if there's already a tachyon there.
-                    if col > 0 
-                        if next_row[col - 1] == '.':
-                            next_row[col - 1] = '|'
-                        elif next_row[col - 1] == '|':
-                            # create a shared node
-                    if col + 1 < len(next_row) and next_row[col + 1] == '.':
-                        next_row[col + 1] = '|'
+
+        # if there are no splitters in `next_row`, simply propagate
+        if all(c == '.' for c in next_row):
+            # this is only propagation. Simply copy `cur_row` to `next_row` eliminating splitters.
+            next_row = (c.translate(self._translation_table) for c in cur_row)
+        else:
+            for col, cr, nr in zip(count(0), cur_row, next_row):
+                if cr in '|S':
+                    # Tachyon found. Propagate it.
+                    if nr == '^':
+                        self._nsplit += 1
+                        # Splitter found. Place tachyons on either side of the splitter
+                        next_row[col - 1], next_row[col + 1] = '|', '|'
+                    else:
+                        # Just propagate it
+                        next_row[col] = '|'
                 elif nr == '.':
                     # No splitter found. Just propagate
-                    next_row[col] = '|'
+                    next_row[col] = cr
         
         # save the new next row
         self._manifold[self._step + 1] = ''.join(next_row)
