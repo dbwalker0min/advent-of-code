@@ -8,6 +8,7 @@ def main():
     man.run_steps()
 
     print(f'Number of splits: {man.get_splits}')
+    print(f'Number of paths: {man.get_number_paths}')
 
 
 if __name__ == "__main__":

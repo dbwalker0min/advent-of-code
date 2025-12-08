@@ -125,3 +125,4 @@ def test_manifold_basic(capsys: CaptureFixture[str]):
 |.|.|.|.|.|||.|
 """
     assert man.get_splits == 21
+    assert man.get_number_paths == 40
