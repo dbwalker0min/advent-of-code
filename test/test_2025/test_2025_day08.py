@@ -73,15 +73,19 @@ def test_make_circuit():
     boxes.make_connection()
     boxes.make_connection()
     assert boxes.get_circuit_lengths == [5, 4, 2, 2]
+    assert boxes.product_of_largest_three_circuits == 40
 
 def test_one_circuit():
     f = StringIO(test_case)
 
     boxes = JunctionBoxes(f)
 
-    boxes.make_connections_until_one_group()
-    
+    boxes.make_connections_until_one_circuit()
+   
     last_pair = boxes.get_last_pair
+    print(last_pair)
     assert last_pair[0] in [(216, 146, 977), (117, 168, 530)]
     assert last_pair[1] in [(216, 146, 977), (117, 168, 530)]
+
+    assert boxes.last_pair_fom == 25272
 

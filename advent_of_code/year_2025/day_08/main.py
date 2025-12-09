@@ -10,21 +10,13 @@ def main():
     for _ in range(1000):
         box.make_connection()
     
-    lens = box.get_circuit_lengths
-    
-    prod_3_largest = lens[0] * lens[1]* lens[2]
-    print(f'Product of three largest circuits: {prod_3_largest}')
+    print(f'Product of three largest circuits: {box.product_of_largest_three_circuits}')
 
-    # now, continue until there's only one remaining
-    while True:
-        box.make_connection()
-        if box.number_circuits == 1:
-            break
+    assert sum(box.get_circuit_lengths) < box.get_number_of_boxes
 
-    last_pair = box.get_last_pair
+    box.make_connections_until_one_circuit()
 
-    product = last_pair[0][0] * last_pair[1][0]
-    print(f'Product of last pair for single group: {product}')
+    print(f'Product of last pair for single group: {box.last_pair_fom}')
 
 if __name__ == '__main__':
     main()
