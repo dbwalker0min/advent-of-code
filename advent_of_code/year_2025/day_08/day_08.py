@@ -38,6 +38,8 @@ class JunctionBoxes:
         
         self._distances.sort()
 
+        self._last_pair = list[TUPLE3, TUPLE3]
+
 
     @staticmethod
     def distance2(a: TUPLE3, b: TUPLE3) -> int:
@@ -50,9 +52,13 @@ class JunctionBoxes:
         """Append a box to the list."""
         self._boxes.append(tuple([int(x) for x in s.split(',')]))
 
+
     def find_minimum_distance(self) -> tuple[int, int]:
         """Finds the pair that are the closest. Returns the indicies of the two boxes"""
         min_dist = self._distances.pop(0)
+
+        self._last_pair = [self._boxes[min_dist.i], self._boxes[min_dist.j]]
+
         return min_dist.i, min_dist.j
     
     def get_box(self, i: int) -> TUPLE3:
@@ -71,25 +77,35 @@ class JunctionBoxes:
             if i in c or j in c:
                 # One of the nodes was found in the circuit. Add them to it.
                 circuits.append(k)
-
         
         if len(circuits) == 2:
             c1, c2 = circuits
             # merge the two circuits together. Note that both i and j must already be there.
-            self._circuits[c1].add(self.circuits.pop(c2))
+            self._circuits[c1] |= self._circuits.pop(c2)
         elif len(circuits) == 1:
-            # there's only one circuit. Add the other one to the list
-            c.add(i)
-            c.add(j)
+            # there's only one circuit. Add the other nodes to the list
+            self._circuits[circuits[0]].add(i)
+            self._circuits[circuits[0]].add(j)
+        elif len(circuits) == 0:
+            # Create a new circuit
+            self._circuits.append({i, j})
         
-        # If I get here, this is a new circuit. Add a new circuit with the new pair.
-        self._circuits.append({i, j})
-
+        # This lets me easily track it in the debugger
         self._circuit_length = self.get_circuit_lengths
 
         # The termination criteria is if
         return len(self._distances) == 0
 
+    def make_connections_until_one_group(self):
+        # get it past startup
+        while len(self._circuits) < 2:
+            self.make_connection()
+
+        while True:
+            self.make_connection()
+            print(self._last_pair)
+            if len(self._circuits) == 1:
+                break
 
     @property
     def get_circuit_lengths(self) -> list[int]:
@@ -97,3 +113,14 @@ class JunctionBoxes:
         lengths.sort(reverse=True)
         return lengths
     
+    @property
+    def get_last_pair(self) -> list[TUPLE3, TUPLE3]:
+        return self._last_pair
+    
+    @property
+    def number_circuits(self):
+        return len(self._circuits)
+    
+    @property
+    def get_number_of_boxes(self):
+        return len(self._boxes)

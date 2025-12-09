@@ -7,17 +7,24 @@ def main():
     with open(input_file_name) as f:
         box = JunctionBoxes(f)
     
-    while True:
+    for _ in range(1000):
         box.make_connection()
-        boxes_in_circuit = sum(box.get_circuit_lengths)
-        print(f'Boxes in circuit: {boxes_in_circuit}')
-        if  boxes_in_circuit == 1000:
-            break
     
     lens = box.get_circuit_lengths
     
     prod_3_largest = lens[0] * lens[1]* lens[2]
     print(f'Product of three largest circuits: {prod_3_largest}')
+
+    # now, continue until there's only one remaining
+    while True:
+        box.make_connection()
+        if box.number_circuits == 1:
+            break
+
+    last_pair = box.get_last_pair
+
+    product = last_pair[0][0] * last_pair[1][0]
+    print(f'Product of last pair for single group: {product}')
 
 if __name__ == '__main__':
     main()
