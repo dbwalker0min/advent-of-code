@@ -100,8 +100,8 @@ def get_shapes(verticies: list[Tuple2]) -> list[Tuple2]:
                 if len(shape) >= 2:
                     shapes.append(shape)
                     # make sure the shape is closed
-                    xstart, ystart = shape[0]
-                    xend, yend = shape[-1]
+                    xstart, ystart = shape[0].x, shape[0].y
+                    xend, yend = shape[-1].x, shape[-1].y
                     assert xstart == xend or ystart == yend, "The shape isn't closed"
                 shape = []
                 # Go to next shape

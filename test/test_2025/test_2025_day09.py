@@ -36,9 +36,12 @@ def test_get_shapes():
     verticies = parse_file(f)
 
     expected_shape = [
-        [(11, 1), (11, 7), (9, 7), (9, 5), (2, 5), (2, 3), (7, 3), (7, 1)]
+        [Tuple2(x=11, y=1), Tuple2(x=11, y=1), Tuple2(x=11, y=1)],
+        [Tuple2(x=7, y=3), Tuple2(x=7, y=3)],
+        [Tuple2(x=9, y=5), Tuple2(x=9, y=5), Tuple2(x=9, y=5)],
     ]
     shapes = get_shapes(verticies)
+    print(shapes)
     assert shapes == expected_shape
 
 
