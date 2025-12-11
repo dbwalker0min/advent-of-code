@@ -9,26 +9,56 @@ class Tuple2:
     x: int
     y: int
 
-    def compute_area(self, other: "Tuple2"):
-        """Compute the area of the tuple agains the other one"""
-        return (abs(self.x - other.x) + 1) * (abs(self.y - other.y) + 1)
+    @staticmethod
+    def min_x(*pts: "Tuple2") -> int:
+        return min([p.x for p in pts])
+
+    @staticmethod
+    def max_x(*pts: "Tuple2") -> int:
+        return max([p.x for p in pts])
+
+    @staticmethod
+    def min_y(*pts: "Tuple2") -> int:
+        return min([p.y for p in pts])
+
+    @staticmethod
+    def max_y(*pts: "Tuple2") -> int:
+        return max([p.y for p in pts])
+    
+    def find_next_vertex(self, verticies: list['Tuple2']) -> int:
+        for i, v in enumerate(verticies):
+            if v.x == self.x or v.y == self.y:
+                return i
+        
+        # by getting here, there were no points that could be on the shape
+        return None
 
 
 @dataclass
-class Segment:
-    """The segment goes from a to b."""
+class Rectangle:
     a: Tuple2
     b: Tuple2
 
+    @property
+    def area(self) -> int:
+        """Compute the area of the tuple agains the other one"""
+        return (abs(self.a.x - self.b.x) + 1) * (abs(self.a.y - self.b.y) + 1)
 
-def parse_file(f: TextIOBase) -> set[Tuple2]:
+    def point_inside(self, p: Tuple2) -> bool:
+        """Determine if point `p` is in the rectangle"""
+        return min(self.a.x, self.b.x) <= p.x <= max(self.a.x, self.b.x) and min(
+            self.a.x, self.b.x
+        ) <= p.x <= max(self.a.x, self.b.x)
+
+
+def parse_file(f: TextIOBase) -> list[Tuple2]:
     """Parse the file of 2-element tuples. A set is used to ignore any duplicates (if any exist)"""
     result: set[Tuple2] = set()
     for line in f:
         line = line.rstrip("\n")
         x, y = [int(x) for x in line.split(",")]
         result.add(Tuple2(x, y))
-    return result
+    return list(result)
 
 
 def largest_red_rectangle(f: TextIOBase) -> int:
@@ -39,34 +69,10 @@ def largest_red_rectangle(f: TextIOBase) -> int:
     # This is tractable; the actual problem has 496 lines and C(496, 2) = 122,760
     largest_area = 0
     for a, b in combinations(existing_tiles, 2):
-        largest_area = max(a.compute_area(b), largest_area)
+        area = Rectangle(a, b).area
+        largest_area = max(area, largest_area)
 
     return largest_area
-
-
-def find_first(x: list[Tuple2], val: Tuple2):
-    """Find the indicies of `val` in the input lists"""
-    # This only works because I *know* that there'll be zero or one point
-
-    # try to find a point that's the same in x
-    try:
-        return x.index(val[0])
-    except ValueError:
-        # X not found. Try y
-        try:
-            return y.index(val[1])
-        except ValueError:
-            return None
-
-
-def segment_horizontal(s: Segment) -> bool:
-    """Is the segment horizontal or vertical? If neither, an exception is thrown."""
-    if s[0][1] == s[1][1]:
-        return True
-    elif s[0][0] == s[1][0]:
-        return False
-    else:
-        assert False
 
 
 def get_shapes(verticies: list[Tuple2]) -> list[Tuple2]:
@@ -86,7 +92,7 @@ def get_shapes(verticies: list[Tuple2]) -> list[Tuple2]:
         # repeat finding the points on the shape until it is empty
         while verticies:
             # Find another node with the same x, or y coordinate
-            n = find_first(verticies, (x, y))
+            n = v.find_next_vertex(verticies)
 
             # Start with this as the first point of the shape
             if n is None:
@@ -103,8 +109,8 @@ def get_shapes(verticies: list[Tuple2]) -> list[Tuple2]:
             else:
                 # The rows or columns line up. It is part of the shape
                 # Pop it so I don't consider this point again. I know it won't be part of another shape.
-                x, y = vx.pop(n), vy.pop(n)
-                shape.append((x, y))
+                verticies.pop(n)
+                shape.append(v)
 
     if shape:
         shapes.append(shape)

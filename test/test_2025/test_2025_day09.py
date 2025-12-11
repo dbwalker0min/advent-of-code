@@ -18,11 +18,10 @@ test_case = """
 
 
 def test_compute_area():
-    assert Tuple2(2, 5).compute_area(Tuple2(9, 7)) == 24
-    assert Tuple2(2, 5).compute_area(Tuple2(9, 7)) == 24
-    assert Tuple2(7, 1).compute_area(Tuple2(11, 7)) == 35
-    assert Tuple2(7, 3).compute_area(Tuple2(2, 3)) == 6
-    assert Tuple2(2, 5).compute_area(Tuple2(11, 1)) == 50
+    assert Rectangle(Tuple2(2, 5), Tuple2(9, 7)).area == 24
+    assert Rectangle(Tuple2(7, 1), Tuple2(11, 7)).area == 35
+    assert Rectangle(Tuple2(7, 3), Tuple2(2, 3)).area == 6
+    assert Rectangle(Tuple2(2, 5), Tuple2(11, 1)).area == 50
 
 
 def test_simple():
@@ -35,15 +34,12 @@ def test_get_shapes():
     f = StringIO(test_case)
 
     verticies = parse_file(f)
-    vx = [x.x for x in verticies]
-    vy = [x.y for x in verticies]
 
     expected_shape = [
         [(11, 1), (11, 7), (9, 7), (9, 5), (2, 5), (2, 3), (7, 3), (7, 1)]
     ]
-    shapes = get_shapes(vx, vy)
+    shapes = get_shapes(verticies)
     assert shapes == expected_shape
-    sh = shapes[0]
 
 
 def test_shapes_real_data():
