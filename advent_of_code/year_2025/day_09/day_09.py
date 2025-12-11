@@ -2,6 +2,10 @@ from io import TextIOBase
 from itertools import combinations, zip_longest
 from typing import assert_never
 from dataclasses import dataclass
+from functools import singledispatchmethod
+
+
+TUPLE2 = tuple[int, int]
 
 
 @dataclass(frozen=True)
@@ -9,27 +13,11 @@ class Tuple2:
     x: int
     y: int
 
-    @staticmethod
-    def min_x(*pts: "Tuple2") -> int:
-        return min([p.x for p in pts])
-
-    @staticmethod
-    def max_x(*pts: "Tuple2") -> int:
-        return max([p.x for p in pts])
-
-    @staticmethod
-    def min_y(*pts: "Tuple2") -> int:
-        return min([p.y for p in pts])
-
-    @staticmethod
-    def max_y(*pts: "Tuple2") -> int:
-        return max([p.y for p in pts])
-    
-    def find_next_vertex(self, verticies: list['Tuple2']) -> int:
+    def find_next_vertex(self, verticies: list["Tuple2"]) -> int:
         for i, v in enumerate(verticies):
             if v.x == self.x or v.y == self.y:
                 return i
-        
+
         # by getting here, there were no points that could be on the shape
         return None
 
@@ -39,16 +27,44 @@ class Rectangle:
     a: Tuple2
     b: Tuple2
 
+    @singledispatchmethod
+    def __init__(self, a, b) -> None:
+        raise TypeError(f"Unsupported argument types: {type(a)}, {type(b)}")
+
+    @__init__.register
+    def _(self, a: tuple, b: tuple):
+        self.a = Tuple2(*a)
+        self.b = Tuple2(*b)
+
+    @__init__.register
+    def _(self, a: Tuple2, b: Tuple2):
+        self.a, self.b = a, b
+
     @property
     def area(self) -> int:
         """Compute the area of the tuple agains the other one"""
         return (abs(self.a.x - self.b.x) + 1) * (abs(self.a.y - self.b.y) + 1)
 
-    def point_inside(self, p: Tuple2) -> bool:
+    @singledispatchmethod
+    def point_inside(self, p) -> None:
+        raise TypeError(f"Unsupported argument type: {type(p)}")
+
+    @point_inside.register
+    def _(self, p: Tuple2) -> bool:
         """Determine if point `p` is in the rectangle"""
-        return min(self.a.x, self.b.x) <= p.x <= max(self.a.x, self.b.x) and min(
-            self.a.x, self.b.x
-        ) <= p.x <= max(self.a.x, self.b.x)
+
+        return all(
+            [
+                min(getattr(self.a, n), getattr(self.b, n))
+                < getattr(p, n)
+                < max(getattr(self.a, n), getattr(self.b, n))
+                for n in "xy"
+            ]
+        )
+
+    @point_inside.register
+    def _(self, p: tuple):
+        return self.point_inside(Tuple2(*p))
 
 
 def parse_file(f: TextIOBase) -> list[Tuple2]:
@@ -109,7 +125,7 @@ def get_shapes(verticies: list[Tuple2]) -> list[Tuple2]:
             else:
                 # The rows or columns line up. It is part of the shape
                 # Pop it so I don't consider this point again. I know it won't be part of another shape.
-                verticies.pop(n)
+                v = verticies.pop(n)
                 shape.append(v)
 
     if shape:
@@ -117,49 +133,32 @@ def get_shapes(verticies: list[Tuple2]) -> list[Tuple2]:
     return shapes
 
 
-def get_rotation(verticies: list[Tuple2]) -> int:
+def get_red_green_area(r: Rectangle, shape: list[Tuple2]) -> int | None:
+    """Given a rectangle, find the largest area"""
 
-    for a, b, c in zip(
-        verticies, verticies[1:] + [verticies[0]], verticies[2:] + [verticies[:2]]
-    ):
-        pass
-
-
-def get_red_green_area(p1: Tuple2, p2: Tuple2, shape: list[Tuple2]) -> int | None:
-    # I have to make sure that the sides of the rectangle don't intersect any of the side of the shape.
-    # It has to fully intersect, just not touch
-    # There are four segments of the square
-    # TODO: Maybe there's a better way to do this...
-    sides = [
-        ((p1[0], p1[1]), (p2[0], p1[1])),
-        ((p2[0], p1[1]), (p2[0], p2[1])),
-        ((p2[0], p2[1]), (p1[0], p2[1])),
-        ((p1[0], p2[1]), (p1[0], p1[1])),
-    ]
+    # TODO: This is not right. It allows the test case rectangle (2, 3), (9, 7) because all the points are on the edge :-(
+    # None of the points in shape can be within the rectangle
+    if any(r.point_inside(p) for p in shape):
+        # A point was inside the shape, so just call it zero
+        return 0
+    return r.area
 
 
 def largest_red_and_green(f: TextIOBase) -> int:
     """Compute the largest area consisting entirely of red and green tiles. This is Part 2."""
 
-    # TODO: This function is *really* long. I ought to split it up some.
     verticies = parse_file(f)
 
-    # split them by x and y coordinates
-    vx = [v[0] for v in verticies]
-    vy = [v[1] for v in verticies]
-
-    shapes = get_shapes(vx, vy)
+    shapes = get_shapes(verticies)
 
     # Now I have all the shapes. I need to find the largest rectangle that fits
     max_area = 0
     for sh in shapes:
         # Consider all pairs of points in the shape (rectangles)
         for p1, p2 in combinations(sh, 2):
-            # I have to make sure that the sides of the rectangle don't intersect any of the side of the shape.
-            # It has to fully intersect, just not touch
-            # There are four segments of the square
-            # TODO: Maybe there's a better way to do this...
-            # here, none of the segments intersect. Compute the area
-            area = get_red_green_area(p1, p2, sh)
-            max_area = max(max_area, area)
+            r = Rectangle(p1, p2)
+            a = r.area
+            if r.area > max_area:
+                area = get_red_green_area(r, sh)
+                max_area = max(max_area, area)
     return max_area
