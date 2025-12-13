@@ -7,5 +7,15 @@
     "[python]": {
         "editor.defaultFormatter": "mikoz.black-py",
         "editor.formatOnSave": true
-    }
+    },
+    "accessibility.signals.lineHasError": {
+        "sound": "off",
+        "announcement": "off"
+    },
+    "accessibility.signals.positionHasError": {
+        "sound": "off",
+        "announcement": "off"
+    },
+    "editor.accessibilitySupport": "off",
+    "accessibility.signalOptions.volume": 0
 }

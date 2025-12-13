@@ -1,11 +1,20 @@
 from io import TextIOBase
-from itertools import combinations, zip_longest
+from itertools import combinations, cycle
 from typing import assert_never
-from dataclasses import dataclass
-from functools import singledispatchmethod
+from dataclasses import dataclass, field
+from enum import Enum, auto
 
 
 TUPLE2 = tuple[int, int]
+
+
+class Direction(Enum):
+    """Enum that defines the direction"""
+
+    HORIZ = auto()
+    VERT = auto()
+    COINCIDENT = auto()
+    OTHER = auto()
 
 
 @dataclass(frozen=True)
@@ -21,37 +30,51 @@ class Tuple2:
         # by getting here, there were no points that could be on the shape
         return None
 
+    def direction(self, b: "Tuple2") -> Direction:
+        """Get the direction from this point to another"""
+        if self.x == b.x and self.y == b.y:
+            return Direction.COINCIDENT
+        elif self.y == b.y:
+            return Direction.HORIZ
+        elif self.x == b.x:
+            return Direction.VERT
+        else:
+            return Direction.OTHER
+
 
 @dataclass
 class Rectangle:
     a: Tuple2
     b: Tuple2
 
-    @singledispatchmethod
-    def __init__(self, a, b) -> None:
-        raise TypeError(f"Unsupported argument types: {type(a)}, {type(b)}")
+    # These are calculated fields
+    max_x: int = field(init=False)
+    max_y: int = field(init=False)
+    min_x: int = field(init=False)
+    min_y: int = field(init=False)
 
-    @__init__.register
-    def _(self, a: tuple, b: tuple):
-        self.a = Tuple2(*a)
-        self.b = Tuple2(*b)
+    def __init__(self, a: Tuple2 | TUPLE2, b: Tuple2 | TUPLE2) -> None:
+        if type(a) is tuple:
+            a = Tuple2(*a)
+        if type(b) is tuple:
+            b = Tuple2(*b)
 
-    @__init__.register
-    def _(self, a: Tuple2, b: Tuple2):
         self.a, self.b = a, b
+
+        # calculate the max and min for convienience
+        self.min_x = min(self.a.x, self.b.x)
+        self.min_y = min(self.a.y, self.b.y)
+        self.max_x = max(self.a.x, self.b.x)
+        self.max_y = max(self.a.y, self.b.y)
 
     @property
     def area(self) -> int:
         """Compute the area of the tuple agains the other one"""
         return (abs(self.a.x - self.b.x) + 1) * (abs(self.a.y - self.b.y) + 1)
 
-    @singledispatchmethod
-    def point_inside(self, p) -> None:
-        raise TypeError(f"Unsupported argument type: {type(p)}")
-
-    @point_inside.register
-    def _(self, p: Tuple2) -> bool:
-        """Determine if point `p` is in the rectangle"""
+    def point_inside(self, p: Tuple2 | TUPLE2) -> None:
+        if type(p) is tuple:
+            p = Tuple2(p[0], p[1])
 
         return all(
             [
@@ -62,9 +85,42 @@ class Rectangle:
             ]
         )
 
-    @point_inside.register
-    def _(self, p: tuple):
-        return self.point_inside(Tuple2(*p))
+    def _map_to_rect(self, p: Tuple2):
+
+        x = min(self.max_x, max(self.min_x, p.x))
+        y = min(self.max_y, max(self.min_y, p.y))
+
+        return Tuple2(x, y)
+
+    def segment_inside(self, seg_st: Tuple2 | TUPLE2, seg_end: Tuple2 | TUPLE2) -> bool:
+        """Determine if the input segment is inside the rectangle"""
+
+        # Handle 2-d Tuples as well
+        # This helps for testing
+        if type(seg_st) is tuple:
+            seg_st = Tuple2(*seg_st)
+        if type(seg_end) is tuple:
+            seg_end = Tuple2(*seg_end)
+
+        # Map the segment to the rectangle
+        seg_st_mapped, seg_end_mapped = self._map_to_rect(seg_st), self._map_to_rect(
+            seg_end
+        )
+
+        # I need to map the segment to the rectangle
+        dir = seg_st.direction(seg_end)
+        x_not_on_boundary = seg_st_mapped.x not in [self.max_x, self.min_x]
+        y_not_on_boundary = seg_st_mapped.y not in [self.max_y, self.min_y]
+        if dir == Direction.COINCIDENT:
+            # The points are the same. Are they both on the boundary?
+            return x_not_on_boundary or y_not_on_boundary
+        elif dir == Direction.HORIZ:
+            # The y-coordinates match. The segment is inside if the y-coordinates are not on the boundary
+            return y_not_on_boundary
+        elif dir == Direction.VERT:
+            return x_not_on_boundary
+        else:
+            assert_never("The points are disjoint. This should never happen")
 
 
 def parse_file(f: TextIOBase) -> list[Tuple2]:
@@ -136,11 +192,12 @@ def get_shapes(verticies: list[Tuple2]) -> list[Tuple2]:
 def get_red_green_area(r: Rectangle, shape: list[Tuple2]) -> int | None:
     """Given a rectangle, find the largest area"""
 
-    # TODO: This is not right. It allows the test case rectangle (2, 3), (9, 7) because all the points are on the edge :-(
-    # None of the points in shape can be within the rectangle
-    if any(r.point_inside(p) for p in shape):
-        # A point was inside the shape, so just call it zero
+    n = len(shape)
+    if any(r.segment_inside(shape[i], shape[(i + 1) % n]) for i in range(n)):
+        # A segment was inside the shape, so just call it zero so it's ignored
         return 0
+
+    # No segments in the area. Return the true area
     return r.area
 
 

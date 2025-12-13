@@ -95,7 +95,24 @@ def test_point_in_rectangle():
 
 def test_rectangle_area():
     assert Rectangle((7, 1), (11, 1)).area == 5
-    assert Rectangle((2,3),(9, 5)).area == 24
+    assert Rectangle((2, 3), (9, 5)).area == 24
+
+
+
+def test_map_seg_to_rect():
+    r = Rectangle((7, 3), (9, 7))
+    assert r._map_to_rect(Tuple2(11, 1)) == Tuple2(9, 3)
+    assert r._map_to_rect(Tuple2(11, 7)) == Tuple2(9, 7)
+    assert r._map_to_rect(Tuple2(7, 1)) == Tuple2(7, 3)
+    assert r._map_to_rect(Tuple2(2, 5)) == Tuple2(7, 5)
+    assert r._map_to_rect(Tuple2(2, 3)) == Tuple2(7, 3)
+    assert r._map_to_rect(Tuple2(11, 1)) == Tuple2(9, 3)
+
+def test_segment_inside():
+    r = Rectangle((7, 3), (9, 7))
+
+    assert r.segment_inside((11, 1), (11, 7)) == False
+    assert r.segment_inside((2, 5), (9, 5)) == True
 
 def test_largest_red_and_green():
     f = StringIO(test_case)
