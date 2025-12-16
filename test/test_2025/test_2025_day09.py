@@ -36,9 +36,16 @@ def test_get_shapes():
     verticies = parse_file(f)
 
     expected_shape = [
-        [Tuple2(x=11, y=1), Tuple2(x=11, y=1), Tuple2(x=11, y=1)],
-        [Tuple2(x=7, y=3), Tuple2(x=7, y=3)],
-        [Tuple2(x=9, y=5), Tuple2(x=9, y=5), Tuple2(x=9, y=5)],
+        [
+            Tuple2(x=11, y=1),
+            Tuple2(x=11, y=7),
+            Tuple2(x=9, y=7),
+            Tuple2(x=9, y=5),
+            Tuple2(x=2, y=5),
+            Tuple2(x=2, y=3),
+            Tuple2(x=7, y=3),
+            Tuple2(x=7, y=1),
+        ]
     ]
     shapes = get_shapes(verticies)
     print(shapes)
@@ -66,17 +73,48 @@ def test_shapes_real_data():
 
     assert largest_red == 4777816465
 
-    shapes = get_shapes(vx, vy)
+    shapes = get_shapes(verticies)
     assert len(shapes) == 1
 
 
-def test_segment_horizontal():
-    assert segment_horizontal([(0, 0), (10, 0)]) == True
-    assert segment_horizontal([(5, -5), (5, 5)]) == False
-    with pt.raises(AssertionError):
-        segment_horizontal([[1, 2], [3, 4]])
+def test_point_in_rectangle():
+    r = Rectangle((1, 2), (7, 5))
+    # This is clearly outside the rectangle
+    assert r.point_inside((0, 0)) == False
+    # This is on the upper segment
+    assert r.point_inside((4, 2)) == False
+    # This is on the leftmost segment
+    assert r.point_inside((3, 1)) == False
+    # This is on the bottom segment
+    assert r.point_inside((3, 5)) == False
+    # This is on the rightmost segment
+    assert r.point_inside((7, 3)) == False
+    # This is on the inside
+    assert r.point_inside((2, 3)) == True
 
 
-def test_get_red_green_area():
-    shapes = [[(11, 1), (11, 7), (9, 7), (9, 5), (2, 5), (2, 3), (7, 3), (7, 1)]]
-    assert True
+def test_rectangle_area():
+    assert Rectangle((7, 1), (11, 1)).area == 5
+    assert Rectangle((2, 3), (9, 5)).area == 24
+
+
+
+def test_map_seg_to_rect():
+    r = Rectangle((7, 3), (9, 7))
+    assert r._map_to_rect(Tuple2(11, 1)) == Tuple2(9, 3)
+    assert r._map_to_rect(Tuple2(11, 7)) == Tuple2(9, 7)
+    assert r._map_to_rect(Tuple2(7, 1)) == Tuple2(7, 3)
+    assert r._map_to_rect(Tuple2(2, 5)) == Tuple2(7, 5)
+    assert r._map_to_rect(Tuple2(2, 3)) == Tuple2(7, 3)
+    assert r._map_to_rect(Tuple2(11, 1)) == Tuple2(9, 3)
+
+def test_segment_inside():
+    r = Rectangle((7, 3), (9, 7))
+
+    assert r.segment_inside((11, 1), (11, 7)) == False
+    assert r.segment_inside((2, 5), (9, 5)) == True
+
+def test_largest_red_and_green():
+    f = StringIO(test_case)
+
+    assert largest_red_and_green(f) == 24
