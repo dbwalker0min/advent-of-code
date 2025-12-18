@@ -107,13 +107,12 @@ class Rectangle:
             seg_end
         )
 
-        # I need to map the segment to the rectangle
-        dir = seg_st.direction(seg_end)
-        x_not_on_boundary = seg_st_mapped.x not in [self.max_x, self.min_x]
-        y_not_on_boundary = seg_st_mapped.y not in [self.max_y, self.min_y]
+        dir = seg_st_mapped.direction(seg_end_mapped)
+        x_not_on_boundary = self.min_x < seg_st_mapped.x < self.max_x
+        y_not_on_boundary = self.min_y < seg_st_mapped.y < self.max_y
         if dir == Direction.COINCIDENT:
             # The points are the same. Are they both on the boundary?
-            return x_not_on_boundary or y_not_on_boundary
+            return x_not_on_boundary and y_not_on_boundary
         elif dir == Direction.HORIZ:
             # The y-coordinates match. The segment is inside if the y-coordinates are not on the boundary
             return y_not_on_boundary
