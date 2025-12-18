@@ -1,12 +1,14 @@
-from .day_11 import solve_part1, solve_part2
+from pathlib import Path
+from advent_of_code.year_2025.day_11 import find_paths_f
 
 
 def main():
-    with open("input.txt") as f:
-        data = f.read().strip().splitlines()
-    print("Part 1:", solve_part1(data))
-    print("Part 2:", solve_part2(data))
+    file_name = Path(__file__).parent / 'input.txt'
+    with open(file_name) as f:
+        result = find_paths_f(f)
+    
+    print(f'Number of paths: {result}')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
+    
