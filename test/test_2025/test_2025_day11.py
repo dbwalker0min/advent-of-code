@@ -15,6 +15,21 @@ hhh: ccc fff iii
 iii: out
 """
 
+test_case_part2 = """svr: aaa bbb
+aaa: fft
+fft: ccc
+bbb: tty
+tty: ccc
+ccc: ddd eee
+ddd: hub
+hub: fff
+eee: dac
+dac: fff
+fff: ggg hhh
+ggg: out
+hhh: out
+"""
+
 nodes = {
     "aaa": TreeNode(node_id="aaa", children=["you", "hhh"]),
     "bbb": TreeNode(node_id="bbb", children=["ddd", "eee"]),
@@ -40,9 +55,16 @@ def test_find_paths():
     f = StringIO(test_case)
     tree = parse_data(f)
 
-    assert find_paths(tree, 'you') == 5
+    results = find_paths(tree, 'you')
+    assert results == 5
 
 def test_find_paths_file():
     f = StringIO(test_case)
 
     assert find_paths_f(f) == 5
+
+def test_find_paths_file_part2():
+    f = StringIO(test_case_part2)
+
+    assert find_paths_f(f, True) == 2
+

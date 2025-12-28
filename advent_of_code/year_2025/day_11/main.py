@@ -7,7 +7,10 @@ def main():
     with open(file_name) as f:
         result = find_paths_f(f)
     
-    print(f'Number of paths: {result}')
+        print(f'Number of paths from "you" to "out": {result}')
+        f.seek(0)
+        result2 = find_paths_f(f, True)
+        print(f'Number of paths through "dac" and "fft" from "svr" to "out" {result2}')
 
 if __name__ == '__main__':
     main()

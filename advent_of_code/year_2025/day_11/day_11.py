@@ -9,11 +9,6 @@ class FlagNode(IntFlag):
     ALL = 3
 
 @dataclass
-class PathResults:
-    npaths: int
-    flags: FlagNode
-
-@dataclass
 class TreeNode:
     # Name of this node
     node_id: str
@@ -30,18 +25,24 @@ def parse_data(f: TextIOBase) -> dict[str, TreeNode]:
         tree[nodeid] = TreeNode(nodeid, children)
     return tree
 
-def find_paths(tree: dict[str, TreeNode], node: str, flags_in: FlagNode = FlagNode.NONE, check_nodes: bool = False) -> int:
+def find_paths(tree: dict[str, TreeNode], node: str, flags_in: FlagNode = FlagNode.NONE, part2: bool = False) -> int:
+    if node == 'out':
+        if part2:
+            return int(flags_in == FlagNode.ALL)
+        else:
+            return 1
+    
     flags = flags_in
+    npaths = 0
     if node == 'fft':
         flags |= FlagNode.FFT
     if node == 'dac':
         flags |= FlagNode.DAC
-    if node == 'out':
-        return 1
-    result = find_paths(tree, c, flags) for c in tree[node].children
-    npaths =
-    return 
 
-def find_paths_f(f: TextIOBase) -> int:
+    return sum(find_paths(tree, c, flags, part2) for c in tree[node].children)
+
+def find_paths_f(f: TextIOBase, part2: bool = False) -> int:
     tree = parse_data(f)
-    return find_paths(tree, 'you')
+
+    src = 'svr' if not part2 else 'svr'
+    return find_paths(tree, src, part2=part2)
