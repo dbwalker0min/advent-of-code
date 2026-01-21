@@ -4,6 +4,8 @@ from functools import reduce
 from itertools import product, count
 from typing import assert_never
 import numpy as np
+from numpy.typing import NDArray
+from scipy.optimize import milp, Bounds, LinearConstraint
 
 
 @dataclass
@@ -43,6 +45,7 @@ def solve_part1(f: TextIOBase) -> int:
 
     return solve_problems(parse_input(f))
 
+
 def solve_part2(f: TextIOBase) -> int:
     return find_joltage_buttons(parse_input(f))
 
@@ -62,30 +65,37 @@ def solve_problems(problems: list[Problem]) -> int:
                 break
     return retval
 
-def find_new_joltage(buttons: int, inp: tuple[int]) -> tuple[int]:
-    """Given a set of buttons, compute the new joltage value"""
-    outp = tuple(inp[i] + (1 if (buttons & (1 << i)) else 0) for i in range(len(inp)))
-    return outp
+
 
 def find_joltage_buttons(problems: list[Problem]) -> int:
     retval = 0
     for p in problems:
-        # make matrix for buttons
-        M = np.array(list([int(b & (1 << n) != 0) for n in range(p.length)] for b in p.buttons)).transpose()
+        # make matrix for buttons.
+        # Each column represents each button.
+        # Each row represents if the battery.
+        M = np.array(
+            list([int(b & (1 << n) != 0) for n in range(p.length)] for b in p.buttons),
+            dtype=np.int32
+        ).T
         b = np.array(p.joltage)
-        x_lstsq, _, _, _ = np.linalg.lstsq(M, b)
-        U, S, Vh = np.linalg.svd(M)
-        print(M)
+        # This is the number of decision variables.
+        # These are the number of presses for each button.
+        n_dvars = len(p.buttons)
+        n_bats: int = p.length
+        # these are the bounds on the decision variables
+        bounds = Bounds(
+            lb=np.zeros(n_dvars), 
+            ub=np.array(list(max(p.joltage) for _ in range(n_dvars)))
+        )
+        constraints = LinearConstraint(
+            M, 
+            lb=np.array(p.joltage), 
+            ub=np.array(p.joltage)
+        )
+        result = milp(
+            np.ones(n_dvars),
+            integrality=1,
+            bounds=bounds, constraints=constraints
+        )
+        retval += result.fun
     return retval
-
-def solve_joltage_problem2(p: Problem) -> int:
-    # figure out the maximum number of times to hit each button
-    for i in range(p.length):
-        for b in p.buttons:
-            joltage = tuple([0]*p.length)
-            b_max = []
-            nhits = 0
-            while all(new < sol for new, sol in zip(joltage, p.joltage)):
-                joltage = find_new_joltage(b, joltage)
-                nhits += 1
-            b_max.append(nhits)

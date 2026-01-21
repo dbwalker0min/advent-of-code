@@ -56,3 +56,4 @@ def test_joltages():
 def test_joltages2():
     f = StringIO(test_case)
     assert solve_part2(f) == 33
+
