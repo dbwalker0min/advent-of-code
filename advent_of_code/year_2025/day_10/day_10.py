@@ -13,7 +13,7 @@ class Problem:
     combo: int
     length: int
     buttons: list[int]
-    joltage: tuple[int]
+    joltage: tuple[int, ...]
 
 
 def parse_input(f: TextIOBase):
