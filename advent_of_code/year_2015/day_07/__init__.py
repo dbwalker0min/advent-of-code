@@ -1,1 +1,1 @@
-from .day_07 import LogicKit
+from .day_07 import LogicKit2
