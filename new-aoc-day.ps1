@@ -7,6 +7,7 @@ param(
 $rootDir   = Get-Location
 $codeRoot  = Join-Path $rootDir 'advent_of_code'
 $testRoot  = Join-Path $rootDir 'test'
+$inputRoot = Join-Path $rootDir 'problem_inputs'
 
 # Ensure base dirs exist
 if (-not (Test-Path $codeRoot)) {
@@ -80,6 +81,7 @@ if ($Day -lt 1 -or $Day -gt 25) {
 $dayStr     = "{0:D2}" -f $Day
 $dayDirName = "day_{0}" -f $dayStr
 $dayDir     = Join-Path $yearDir $dayDirName
+$inputDir   = Join-Path $inputRoot $Year
 
 if (-not (Test-Path $dayDir)) {
     New-Item -ItemType Directory -Path $dayDir | Out-Null
@@ -91,7 +93,7 @@ if (-not (Test-Path $dayDir)) {
 
 $initPath = Join-Path $dayDir '__init__.py'
 $mainPath = Join-Path $dayDir 'main.py'
-$inputPath = Join-Path $dayDir 'input.txt'
+$inputPath = Join-Path $inputDir "day${day}_input.txt"
 $dayModulePath = Join-Path $dayDir ("day_{0}.py" -f $dayStr)
 
 # __init__.py (empty if not present)
@@ -102,15 +104,13 @@ if (-not (Test-Path $initPath)) {
 # main.py template
 if (-not (Test-Path $mainPath)) {
     $mainContent = @"
-from .day_$dayStr import solve_part1, solve_part2
-
+from advent_of_code.year_$year.day_$dayStr import entity
+from advent_of_code.utility import open_input_file
 
 def main():
-    with open("input.txt") as f:
-        data = f.read().strip().splitlines()
-    print("Part 1:", solve_part1(data))
-    print("Part 2:", solve_part2(data))
-
+    with open_input_file() as f:
+        ...
+    
 
 if __name__ == "__main__":
     main()
@@ -126,14 +126,8 @@ if (-not (Test-Path $inputPath)) {
 # day_XX.py template
 if (-not (Test-Path $dayModulePath)) {
     $dayContent = @"
-def solve_part1(data):
-    # TODO: implement part 1
-    pass
-
-
-def solve_part2(data):
-    # TODO: implement part 2
-    pass
+from io import TextIOBase
+    
 "@
     $dayContent | Set-Content -Path $dayModulePath -Encoding UTF8
 }
@@ -154,30 +148,14 @@ $testFilePath = Join-Path $testYearDir $testFileName
 
 if (-not (Test-Path $testFilePath)) {
     $testContent = @"
-import pathlib
+from io import StringIO
 
-from advent_of_code.year_$Year.day_$dayStr import solve_part1, solve_part2
-
-# Adjust this path logic to match your test setup if needed
-INPUT = (
-    pathlib.Path(__file__)
-    .resolve()
-    .parents[2]
-    / "advent_of_code"
-    / "year_$Year"
-    / "day_$dayStr"
-    / "input.txt"
-)
-
+from advent_of_code.year_$Year.day_$dayStr.day_$dayStr import *
 
 def test_part1():
     data = INPUT.read_text().strip().splitlines()
     assert solve_part1(data) is not None
 
-
-def test_part2():
-    data = INPUT.read_text().strip().splitlines()
-    assert solve_part2(data) is not None
 "@
     $testContent | Set-Content -Path $testFilePath -Encoding UTF8
 }
